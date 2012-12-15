@@ -24,7 +24,6 @@
       #progressBar div {
         background-color: red;
         height: 100%;
-        width: 1%;
         float: left;
       }
     </style>
@@ -39,7 +38,7 @@
       <label for="password">Password</label>
       <input id="password" name="password" type="password" data-mandatory="true" onkeyup="updateHash()" />
     </div>
-    <div id="progressBar"></div>
+    <div id="progressBar"><div></div></div>
     <div id="message"></div>
     <div id="output"></div>
     
@@ -60,9 +59,10 @@
         var progressCount = 1; // We have to count how many progress steps have actually been taken, because
                                //bcrypt's progress callback is called an unpredictable number of times.
         function generateHash() {
+          resetProgressBar();
           Passtastic.getBCrypt('test', 
                                function(result) {
-                                 while(progressCount < 100) {
+                                 while(progressCount <= 100) {
                                    updateProgressBar();
                                  }
                                  $('#output').text(result) 
@@ -73,11 +73,11 @@
         }
         function resetProgressBar() {
           progressCount = 0;
-          $('#progressBar').html('');
+          $('#progressBar div').css('width', 0);
         }
         function updateProgressBar() {
-          ++progressBar;
-          $('#progressBar').append('<div />');
+          ++progressCount;
+          $('#progressBar div').css('width', progressCount+'%');
         }
 
         $('#generateBtn').click(function() {
