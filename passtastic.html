@@ -56,12 +56,12 @@
     <script src="passtastic.js" type="text/javascript"></script>  
     <script type="text/javascript">
       (function($) {
-        var progressCount = 1; // We have to count how many progress steps have actually been taken, because
-                               //bcrypt's progress callback is called an unpredictable number of times.
         function generateHash() {
           resetProgressBar();
           Passtastic.getBCrypt('test', 
                                function(result) {
+                                 // We have to count how many progress steps have actually been taken, because
+                                 //bcrypt's progress callback is called an unpredictable number of times.
                                  while(progressCount <= 100) {
                                    updateProgressBar();
                                  }
@@ -72,7 +72,7 @@
                                });
         }
         function resetProgressBar() {
-          progressCount = 0;
+          progressCount = 1;
           $('#progressBar div').css('width', 0);
         }
         function updateProgressBar() {
