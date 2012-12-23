@@ -139,6 +139,8 @@
       
       //Step 2: shuffle the strings using the first 49 bits of the binary string
       charArrays = this._shuffle(charArrays, binary.slice(0, 49));
+      
+      debugger;
     },
     
     _getStandardCharArrays : function() {
@@ -203,25 +205,28 @@
           middle,//The middle of the staging array, used to set where we splice from
           blockSize; //The size in bits of the current binaryBlock
       
-      while(shuffledItems.length < items.length) {
+      while(items.length) {
         stagingArray = items.slice(0); //Copy the arrays into a staging array - we'll remove items from the staging array until only one is left
         blockSize = this._getRequiredBits(items.length);
-        binaryBlock = binary.slice(blockPos, blockSize); // We always slice the maximum bits we could require from the binary string to
-                                                           // ensure that we always consume the same number of bits for each array.
+        binaryBlock = binary.slice(blockPos, blockPos + blockSize); // We always slice the maximum bits we could require from the binary string to
+                                                                    // ensure that we always consume the same number of bits for each array.
         blockPos += blockSize;
         
-        bitPos = 0;
+        bitPos = 0;        
         while(stagingArray.length > 1) {
           bit = binaryBlock.charAt(bitPos++);
           middle = Math.ceil(stagingArray.length/2);
           if(bit == '1')
             stagingArray.splice(0, middle); //Remove the lower half
           else if(bit == '0')
-            stagingArray.splice(middle, stagingArray.length); //Remove the upper half
+            stagingArray.splice(middle); //Remove the upper half
+          else if(bit == '')
+            throw('Passtastic._shuffle() - There is an error in the logic in this function. We seem to have run out of bits before we could select an item.');
           else
             throw('Passtastic._shuffle() - The passed binary string is invalid. It contains the character "'+bit+'", which is not a 0 or 1.');
         }
         
+        items.splice(items.indexOf(stagingArray[0]), 1);
         shuffledItems.push(stagingArray[0]);
       }
       
