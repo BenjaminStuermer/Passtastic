@@ -16,7 +16,7 @@
   
   /**
    * String containing all characters used in bcrypt's base 64 schema, arranged in order
-   * of ordinality (so . == 0, / == 1, A == 2, etc). This allows us to use indexOf() to grab
+   * of ordinality (so . == 0, / == 1, A == 2, etc). This allows us to use indexOf() to get
    * the value of a digit.
    */
   var BCRYPT_BASE64_VALS = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -71,7 +71,7 @@
                       if(bcryptHash.length != 31) //Sanity check
                         throw('Passtastic.getPassword() - The bcrypt hash output should always be exactly 31 characters long, but it was found to be ' + bcryptHash.length + ' chars long!');
 
-                      binaryHash = self.bcryptBase64ToBinary(bcryptHash);
+                      binaryHash = self._bcryptBase64ToBinary(bcryptHash);
                       password = self._convertBinaryToPw(binaryHash);
                       resultCallback(password);
                     },
@@ -87,7 +87,7 @@
      *
      * @return string
      */
-    bcryptBase64ToBinary : function(base64) {
+    _bcryptBase64ToBinary : function(base64) {
       var result = '',
           binaryChar, //binary representation of a single character
           charVal; //Numeric value of a single character
@@ -135,7 +135,18 @@
         throw('Passtastic._convertBinaryToPw() - The passed binary string is not ' + BCRYPT_BIN_LEN + ' characters long. It is ' + binary.length + ' characters long.');
       
       //Step 1: Construct our 16 arrays of characters (ie, strings)
+      var charArrays = this._getStandardCharArrays();
+      
+      //Step 2: shuffle the strings using the first 49 bits of the binary string
+      charArrays = this._shuffle(charArrays, binary.slice(0, 49));
+    },
+    
+    _getStandardCharArrays : function() {
+      //TODO: Once the algorithm has been tested out and I'm reasonably sure these arrays
+      // won't be changed, I should really just hard-code them. It's silly to algorithmically
+      // generate them given that they're static.
       var charArrays = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+      
       while(charArrays[0].length < CHAR_ARRAY_LEN) //First array - lower-case characters
         charArrays[0] += LOWER_CASE_CHARS;
       while(charArrays[1].length < CHAR_ARRAY_LEN) //Second array - upper-case characters
@@ -156,13 +167,85 @@
           curCharIdx = 0;
       for(; curStrIdx < charArrays.length && charArrays[curStrIdx].length < CHAR_ARRAY_LEN; curStrIdx++) {
         for(; charArrays[curStrIdx].length < CHAR_ARRAY_LEN; curCharIdx++) {
-          charArrays[curStrIdx] += allChars.charAt(curCharIdx);
-          
-          if(curCharIdx == allChars.length)
+          if(curCharIdx > allChars.length)
             curCharIdx = 0;
+          
+          charArrays[curStrIdx] += allChars.charAt(curCharIdx);
         }
       }
-       //TODO: The loop seems to exclude the lower-case "a" character for some reason. Probably just a FireBug output error.
+      
+      return charArrays;
+    },
+    
+    /**
+     * Shuffles a 16-member array via binary-tree selection using a binary string
+     * as an entropy source.
+     * 
+     * The shuffle is performed by repeatedly dividing the array in half. If the next
+     * bit in the binary string is a 0, the half with lower indices is kept, if 1 then
+     * the higher half is kept. For an odd number of members, the middle member is put
+     * in the lower half. Whenever the number of remaining array members is 1, that
+     * item is removed from the source array and pushed onto the shuffled array.
+     * 
+     * For rounds which are not powers of two, the number of bits required to search the
+     * next highest power of two is always consumed by the round, even if they are not all
+     * actually used. EG, since the maximum number of bits that could be required to get
+     * a single member from a 15-member array is 4, we consume 4 bits in selecting one
+     * even if only 3 of those bits end up being used.
+     */
+    _shuffle : function(items, binary) {
+      var shuffledItems = [],
+          stagingArray, //Used to stage the arrays while selecting one
+          binaryBlock, //block of bits used to retrieve each member of the passed array
+          blockPos = 0, //index from which to retrieve the next "binaryBlock" from "binary"
+          bit, //Stores single bits from the binary string
+          bitPos, //Index from which to retrieve the next "bit" from "binaryBlock"
+          middle,//The middle of the staging array, used to set where we splice from
+          blockSize; //The size in bits of the current binaryBlock
+      
+      while(shuffledItems.length < items.length) {
+        stagingArray = items.slice(0); //Copy the arrays into a staging array - we'll remove items from the staging array until only one is left
+        blockSize = this._getRequiredBits(items.length);
+        binaryBlock = binary.slice(blockPos, blockSize); // We always slice the maximum bits we could require from the binary string to
+                                                           // ensure that we always consume the same number of bits for each array.
+        blockPos += blockSize;
+        
+        bitPos = 0;
+        while(stagingArray.length > 1) {
+          bit = binaryBlock.charAt(bitPos++);
+          middle = Math.ceil(stagingArray.length/2);
+          if(bit == '1')
+            stagingArray.splice(0, middle); //Remove the lower half
+          else if(bit == '0')
+            stagingArray.splice(middle, stagingArray.length); //Remove the upper half
+          else
+            throw('Passtastic._shuffle() - The passed binary string is invalid. It contains the character "'+bit+'", which is not a 0 or 1.');
+        }
+        
+        shuffledItems.push(stagingArray[0]);
+      }
+      
+      return shuffledItems;
+    },
+    
+    /**
+     * Gets the number of bits required to represent an address in a block of some
+     * length. Essentially this returns the ceiling of log2(length).
+     * 
+     * @param length integer
+     */
+    _getRequiredBits : function(length) {
+      if(!length)
+        throw('Passtastic._getRequiredBits() - Invalid length parameter.');
+      
+      var i = 0, maxBits = 1;
+      while(++i < 10) {
+        maxBits*=2;
+        if(maxBits >= length)
+          return i;
+      }
+      
+      throw('Passtastic._getRequiredBits() - You passed a length requiring more than 10 bits. This function should be rewritten to use log functions if you want to use it for larger numbers.');
     }
   };
 })(window, jQuery);
