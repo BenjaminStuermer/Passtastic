@@ -134,13 +134,23 @@
       if(binary.length != BCRYPT_BIN_LEN) //sanity check
         throw('Passtastic._convertBinaryToPw() - The passed binary string is not ' + BCRYPT_BIN_LEN + ' characters long. It is ' + binary.length + ' characters long.');
       
+      var password = '';
+      
       //Step 1: Construct our 16 arrays of characters (ie, strings)
       var charArrays = this._getStandardCharArrays();
       
       //Step 2: shuffle the strings using the first 49 bits of the binary string
       charArrays = this._shuffle(charArrays, binary.slice(0, 49));
       
-      debugger;
+      //Step 3: Use the rest of the binary string to get one character from each string
+      var blockSize = this._getRequiredBits(CHAR_ARRAY_LEN);
+      var curVal;
+      for(var i = 0; i < charArrays.length; i++) {
+        curVal = parseInt('0b'+binary.slice(50 + i*blockSize, blockSize));
+        password += charArrays[i].charAt(curVal);
+      }
+      
+      return password;
     },
     
     _getStandardCharArrays : function() {
