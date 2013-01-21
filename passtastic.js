@@ -32,8 +32,9 @@
      * 
      * The algorithm (roughly): (TODO: formal documentation of the algorithm) 
      * - The strings site, userName and masterPw are hashed using bcrypt. The hash
-     * input is simply the three string concatenated in that order, the salt is the MD5 hash of
-     * the site concatenated with the userName (converted into base64).
+     * input is simply the three strings concatenated in that order, the salt is the MD5 hash of
+     * the same three concatenated strings, converted into base64 to decrease the possibility of
+     * salt collisions.
      * - Sixteen arrays are generated (note that the order must be identical to this implementation
      * or the result will differ!). The first consists only of lower-case characters, the second of
      * upper-case, the third of digits and the fourth of special characters. The remaining eight arrays
@@ -57,7 +58,7 @@
       
       bcrypt.hashpw(site + userName + masterPw,
       
-                    '$'+BCRYPT_VERSION+'$'+BCRYPT_WORK_PARAM+'$'+self._generateSalt(site+userName),
+                    '$'+BCRYPT_VERSION+'$'+BCRYPT_WORK_PARAM+'$'+self._generateSalt(site+userName+masterPw),
       
                     //Callback that is passed the result of the function
                     function (bcryptHash) {
@@ -112,12 +113,55 @@
     
     /**
      * Generates a bcrypt salt based on a string. The MD5 hash of the string is generated,
-     * and converted into base64.
+     * and converted into a bcrypt-style base64 representation.
+     * 
+     * @param str - The input string
+     * @return string
      */
     _generateSalt : function(str) {
-      var salt = 'b0MHMsT3ErLoTRjpjzsCie';
-      //TODO: do something here instead of just returning a hard-coded string
-      return salt;
+      return this._binaryToBase64(this._hexToBinary(calcMD5(str)));
+    },
+    
+    /**
+     * Converts a binary string into a bcrypt-style base64 string
+     * 
+     * @param bin - String
+     * @return string
+     */
+    _binaryToBase64 : function(bin) {
+      var result = '',
+          binBlock; //The current block of the binary string with which we are working
+      
+      while(binBlock = bin.slice(0, 6)) {
+        //TODO
+      }
+      
+      binaryChar = '000000'.substring(0, 6 - binaryChar.length) + binaryChar
+      return result;
+    },
+    
+    /**
+     * Converts a hex string into a binary string
+     * 
+     * @param hex - String
+     * @return string
+     */
+    _hexToBinary : function(hex) {
+      var result = '',
+          binaryChar, //binary representation of a single character
+          charVal; //Numeric value of a single character
+      for(var i = 0; i < hex.length; i++) {
+        charVal = parseInt(hex.charAt(i), 16);
+        
+        binaryChar = charVal.toString(2);
+
+        //Pad the binary representation out so that each character generates a 4-bit chunk
+        binaryChar = '0000'.substring(0, 6 - binaryChar.length) + binaryChar;
+
+        result += binaryChar;
+      }      
+      
+      return result;
     },
     
     /**
