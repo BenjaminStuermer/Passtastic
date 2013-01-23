@@ -25,7 +25,7 @@
   var UPPER_CASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   var NUMERICAL_CHARS = '0123456789';
   var SPECIAL_CHARS = '!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~'; // -> The 32 non-whitespace ASCII characters between 33 and 126
-   
+  
   window.Passtastic = {
     /**
      * Deterministically generates a password based on three strings.
@@ -123,20 +123,24 @@
     },
     
     /**
-     * Converts a binary string into a bcrypt-style base64 string
+     * Converts a binary string into a bcrypt-style base64 string. The binary
+     * string is expected to contain 6*N characters, simply because this function
+     * is intended to take an MD5 value and special handling would be needed for
+     * strings with other lengths.
      * 
      * @param bin - String
      * @return string
      */
     _binaryToBase64 : function(bin) {
-      var result = '',
-          binBlock; //The current block of the binary string with which we are working
+      var result = ''; //The current block of the binary string with which we are working
       
-      while(binBlock = bin.slice(0, 6)) {
-        //TODO
+      while(bin.length) {
+        var binVal = bin.slice(0, 6);
+        result += BCRYPT_BASE64_VALS.charAt(parseInt(binVal, 2));
+        
+        bin = bin.substring(6);
       }
       
-      binaryChar = '000000'.substring(0, 6 - binaryChar.length) + binaryChar
       return result;
     },
     
@@ -150,6 +154,7 @@
       var result = '',
           binaryChar, //binary representation of a single character
           charVal; //Numeric value of a single character
+          
       for(var i = 0; i < hex.length; i++) {
         charVal = parseInt(hex.charAt(i), 16);
         

@@ -187,4 +187,4 @@
     }
     return rhex(a) + rhex(b) + rhex(c) + rhex(d);
   }
-});
+})();
