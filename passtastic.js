@@ -39,20 +39,24 @@
      * or the result will differ!). The first consists only of lower-case characters, the second of
      * upper-case, the third of digits and the fourth of special characters. The remaining eight arrays
      * are constructed from characters of all four classes. Each array is 256 characters long.
+     * - NOTE: For the above step, the user is given the option to generate the password without any
+     * special characters. If this option is selected, only upper case, lower case chars and numbers
+     * are used.
      * - The bcrypt hash is used as a source of entropy for the rest of the algorithm. Bcrypt
      * generates 184 bits of entropy. Bits are consumed from the most-significant end (from left to right).
      * - The first 49 bits are used to shuffle the 16 character arrays by treating the collection of arrays
      * as a binary tree. (Note that this wastes bits, we treat them as consumed anyhow)
      * - One character is picked from each of the shuffled arrays, and the characters are concatenated to
      * create the password. This step consumes 128 of the remaining 135 bits of entropy.
-     * - Just for fun, and to use up the last 7 bits, we count the number of 1s in the remaining string.
-     * If it is odd, we reverse the order of the output password. (We count 1s intentionally to be forgiving
-     * of implementations that don't take into account that the last character of a bcrypt output only encodes
-     * 4 bits rather than 6).
      *
      * @param string site 
+     * @param string userName,
+     * @param string masterPw
+     * @param bool useSpecialChars - If true, the generated password will contain 1 or more special characters
+     * @param function resultCallback - passed the generated password
+     * @param function progress - Optional, called periodically (approx. 100 times) during hash generation.
      */
-    getPassword : function(site, userName, masterPw, resultCallback, progress) {
+    getPassword : function(site, userName, masterPw, useSpecialChars, resultCallback, progress) {
       var self = this,
       bcrypt = new bCrypt();
       
@@ -73,7 +77,7 @@
                         throw('Passtastic.getPassword() - The bcrypt hash output should always be exactly 31 characters long, but it was found to be ' + bcryptHash.length + ' chars long!');
 
                       binaryHash = self._bcryptBase64ToBinary(bcryptHash);
-                      password = self._convertBinaryToPw(binaryHash);
+                      password = self._convertBinaryToPw(binaryHash, useSpecialChars);
                       resultCallback(password);
                     },
                     
@@ -174,19 +178,20 @@
      * see the doc comment for getPassword().
      * 
      * @param binary - A 184-bit binary string
+     * @param useSpecialChars bool, if true, the generated password will contain at least one special character
      * 
      * @return A 16-character password string containing lower-case and upper-case characters,
      *         digits and special characters. At least one of each is guaranteed to be in the
      *         password.
      */
-    _convertBinaryToPw : function(binary) {
+    _convertBinaryToPw : function(binary, useSpecialChars) {
       if(binary.length != BCRYPT_BIN_LEN) //sanity check
         throw('Passtastic._convertBinaryToPw() - The passed binary string is not ' + BCRYPT_BIN_LEN + ' characters long. It is ' + binary.length + ' characters long.');
       
       var password = '';
       
       //Step 1: Construct our 16 arrays of characters (ie, strings)
-      var charArrays = this._getStandardCharArrays();
+      var charArrays = this._getStandardCharArrays(useSpecialChars);
       
       //Step 2: shuffle the strings using the first 49 bits of the binary string
       charArrays = this._shuffle(charArrays, binary.slice(0, 49));
@@ -202,10 +207,14 @@
       return password;
     },
     
-    _getStandardCharArrays : function() {
-      //TODO: Once the algorithm has been tested out and I'm reasonably sure these arrays
-      // won't be changed, I should really just hard-code them. It's silly to algorithmically
-      // generate them given that they're static.
+    /**
+     * Generates a collection of 16 strings that are used to generate a password
+     * 
+     * @param useSpecialChars bool - If true, one of the arrays will consist only
+     *        of special characters, and the arrays that are not limited to a single
+     *        class of character will include special characters.
+     */
+    _getStandardCharArrays : function(useSpecialChars) {
       var charArrays = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
       
       while(charArrays[0].length < CHAR_ARRAY_LEN) //First array - lower-case characters
@@ -214,17 +223,22 @@
         charArrays[1] += UPPER_CASE_CHARS;
       while(charArrays[2].length < CHAR_ARRAY_LEN) //Third array - digits
         charArrays[2] += NUMERICAL_CHARS;
-      while(charArrays[3].length < CHAR_ARRAY_LEN) //Fourth array - special chars
-        charArrays[3] += SPECIAL_CHARS;
       
       charArrays[0] = charArrays[0].substring(0, CHAR_ARRAY_LEN);
       charArrays[1] = charArrays[1].substring(0, CHAR_ARRAY_LEN);
       charArrays[2] = charArrays[2].substring(0, CHAR_ARRAY_LEN);
-      charArrays[3] = charArrays[3].substring(0, CHAR_ARRAY_LEN);
       
-      //All 12 remaining arrays contain all characters, inserted cyclically
-      var allChars = LOWER_CASE_CHARS + UPPER_CASE_CHARS + NUMERICAL_CHARS + SPECIAL_CHARS,
-          curStrIdx = 4,
+      
+      if(useSpecialChars) {
+        while(charArrays[3].length < CHAR_ARRAY_LEN) { //Fourth array - special chars
+          charArrays[3] += SPECIAL_CHARS;
+        }
+        charArrays[3] = charArrays[3].substring(0, CHAR_ARRAY_LEN);
+      }
+      
+      //All remaining arrays contain all characters, inserted cyclically
+      var allChars = LOWER_CASE_CHARS + UPPER_CASE_CHARS + NUMERICAL_CHARS + (useSpecialChars ? SPECIAL_CHARS : ''),
+          curStrIdx = useSpecialChars ? 4 : 3,
           curCharIdx = 0;
       for(; curStrIdx < charArrays.length && charArrays[curStrIdx].length < CHAR_ARRAY_LEN; curStrIdx++) {
         for(; charArrays[curStrIdx].length < CHAR_ARRAY_LEN; curCharIdx++) {

@@ -47,6 +47,13 @@
         height: 100%;
         float: left;
       }
+      
+      #siteNoSpecCharWarning {
+        width: 500px;
+        float: left;
+        background-color: khaki;
+        border: 1px solid brown;
+      }
     </style>
   </head>
 
@@ -54,11 +61,11 @@
     <div id="container">
       <div class="row">
         <label for="site">Site</label>
-        <input id="site" name="site" type="text" value="" />
+        <input id="site" name="site" type="text" />
       </div>
       <div class="row">
         <label for="userName">User Name</label>
-        <input id="userName" name="userName" type="text" value="" />
+        <input id="userName" name="userName" type="text" />
       </div>
       <div class="row">
         <label for="masterPw">Master Password</label>
@@ -67,6 +74,16 @@
       <div id="progressBar"><span id="output"></span><div></div></div>
 
       <button id="generateBtn">Generate password</button>
+      <input id="noSpecChars" name="noSpecChars" type="checkbox" />
+      <label for="noSpecChars">No special chars</label>
+    </div>
+    <div id="siteNoSpecCharWarning" style="display:none">
+      <p>Well shit. It seems like <b id="noCharSiteName"></b> does not allow special characters 
+      like ")" or "_" to be used in passwords. This is a stupid policy, and you ought to
+      send them an e-mail and ask them to change their foolish ways, but until they do, we
+      suggest that you click the "No special chars" box.</p>
+      <p>Remember! If you use the "No special chars" option to create a password, you have to make sure
+      to select it whenever you generate your password for that site!</p> 
     </div>
     
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
@@ -82,6 +99,13 @@
     <script src="passtastic.js" type="text/javascript"></script>  
     <script type="text/javascript">
       (function($) {
+        //Domains that do not permit special characters in their passwords - the option to generate a password withou
+        // special characters will be recommended to the user for these sites.
+        var NO_SPEC_CHAR_SITES = [
+          'stayfriends.de', //They do allow special characters via user settings, but not on their new-user landing page due to a bug.
+          'delta.com'
+        ];
+  
         var progressCount;
         
         function generateHash() {
@@ -89,7 +113,8 @@
           
           Passtastic.getPassword($('#site').val(), 
                                  $('#userName').val(), 
-                                 $('#masterPw').val(), 
+                                 $('#masterPw').val(),
+                                 !$('#noSpecChars').is(':checked'),
                                  function(result) {
                                    // We have to count how many progress steps have actually been taken, because
                                    //bcrypt's progress callback is called an unpredictable number of times.
@@ -112,6 +137,19 @@
         }
         $('#generateBtn').click(function() {          
           generateHash();
+        });
+        
+        $('#site').keyup(function() {
+          var site = $(this).val(),
+              warning = $('#siteNoSpecCharWarning');
+
+          if(NO_SPEC_CHAR_SITES.indexOf(site) != -1) {
+            $('#noCharSiteName').text(site);
+            warning.show();
+          } 
+          else {
+            warning.hide();
+          }  
         });
       })(jQuery);
     </script>
