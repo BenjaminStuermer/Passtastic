@@ -153,6 +153,13 @@
         });
         
         $('#site').keyup(); //Trigger once in case the user has already typed while scripts loaded
+        
+        $(document).keypress(function(event) {
+          debugger;
+          if(event.which == 13) {
+            generateHash();
+          }
+        });
       })(jQuery);
     </script>
   </body>
