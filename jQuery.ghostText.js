@@ -71,7 +71,6 @@
         throw('jQuery.ghostText.js - Invalid target, ghostText may only be applied to text and password input fields');
       }
       
-    
       update(this, ghostText);
     });
     
