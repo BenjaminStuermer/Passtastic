@@ -1,53 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>    
+  <head>
     <meta charset="UTF-8" />
     <style type="text/css">
+      body {
+        background-color: #EEEEEE;
+        font: 12pt courier;
+      }
+      
       #container {
         margin: 15px;
         float: left;
         padding: 15px;
-        background-color: grey;
-        
+        background-color: #D1D1D1;
+
         -webkit-border-radius: 20px;
-        border-radius: 20px;        
+        border-radius: 20px;
       }
-      
+
       input {
         margin-top: 2px;
-      }
-      
-      label {
-        display: inline-block;
-        width: 115px;
-      }
-      
-      input.error {
-        background-color: rgb(255, 175, 175);
-      }
-      
-      .row {
-        margin-bottom: 2px;
+        background-color: #FFFFFF;
+        border: none;
+        border-radius: 5px;
+        padding-left: 5px;
+        color: #AAAAAA;
+        font-family: inherit;
+        font-size: 16pt;
       }
       
       #output {
-        position: absolute;
-        left: 20px;
-        top: 4px;
+        background-color: #AAAAAA;
       }
       
-      #progressBar {
-        position: relative; /* Creates positioning context for the output */
-        width: 200px;
-        height: 30px;
-        background-color: grey;
+      .ghostTextEmptyInput {
+        color: #CCCCCC;
       }
-      #progressBar div {
-        background-color: red;
-        height: 100%;
-        float: left;
+
+      input.error {
+        background-color: rgb(255, 175, 175);
       }
-      
+
+      .row {
+        margin-bottom: 2px;
+      }
+
       #siteNoSpecCharWarning {
         width: 500px;
         float: left;
@@ -60,33 +57,33 @@
   <body>
     <div id="container">
       <div class="row">
-        <label for="site">Site</label>
         <input id="site" name="site" type="text" />
       </div>
       <div class="row">
-        <label for="userName">User Name</label>
         <input id="userName" name="userName" type="text" />
       </div>
       <div class="row">
-        <label for="masterPw">Master Password</label>
         <input id="masterPw" name="masterPw" type="password" />
       </div>
-      <div id="progressBar"><span id="output"></span><div></div></div>
+      <div class="row">
+        <input id="output" disabled="disabled" name="output" type="text" value="--RESULT--" />
+      </div>
 
-      <button id="generateBtn">Generate password</button>
       <input id="noSpecChars" name="noSpecChars" type="checkbox" />
       <label for="noSpecChars">No special chars</label>
     </div>
     <div id="siteNoSpecCharWarning" style="display:none">
-      <p>Well shit. It seems like <b id="noCharSiteName"></b> does not allow special characters 
+      <p>Well shit. It seems like <b id="noCharSiteName"></b> does not allow special characters
       like ")" or "_" to be used in passwords. This is a stupid policy, and you ought to
       send them an e-mail and ask them to change their foolish ways, but until they do, we
       suggest that you click the "No special chars" box.</p>
       <p>Remember! If you use the "No special chars" option to create a password, you have to make sure
-      to select it whenever you generate your password for that site!</p> 
+      to use it whenever you generate your password for that site!</p>
     </div>
-    
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+    <script src="jquery.ghostText.js" type="text/javascript"></script>
+    <script src="jquery.selectText.js" type="text/javascript"></script>
     <script src="MochiKit/MochiKit.js" type="text/javascript"></script>
     <script src="Clipperz/Base.js" type="text/javascript"></script>
     <script src="Clipperz/ByteArray.js" type="text/javascript"></script>
@@ -94,11 +91,15 @@
     <script src="Clipperz/Crypto/SHA.js" type="text/javascript"></script>
     <script src="Clipperz/Crypto/AES.js" type="text/javascript"></script>
     <script src="Clipperz/Crypto/PRNG.js" type="text/javascript"></script>
-    <script src="bCrypt.js" type="text/javascript"></script>  
-    <script src="md5.js" type="text/javascript"></script>  
-    <script src="passtastic.js" type="text/javascript"></script>  
+    <script src="bCrypt.js" type="text/javascript"></script>
+    <script src="md5.js" type="text/javascript"></script>
+    <script src="passtastic.js" type="text/javascript"></script>
     <script type="text/javascript">
       (function($) {
+        $('#site').ghostText('--Site--');
+        $('#userName').ghostText('--User Name--');
+        $('#masterPw').ghostText('--Master Password--');
+        
         //Domains that do not permit special characters in their passwords - the option to generate a password withou
         // special characters will be recommended to the user for these sites.
         var NO_SPEC_CHAR_SITES = [
@@ -106,40 +107,47 @@
           'delta.com',
           'hapo.org' //does not allow | ^ ' " ( ) [ ] { } < >
         ];
-  
-        var progressCount;
-        
+
+        var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         function generateHash() {
-          resetProgressBar();
+          $('#output').css('background-color', $('#site').css('background-color'));
           
-          Passtastic.getPassword($('#site').val(), 
-                                 $('#userName').val(), 
+          var progressCounter = 0;
+          
+          Passtastic.getPassword($('#site').val(),
+                                 $('#userName').val(),
                                  $('#masterPw').val(),
                                  !$('#noSpecChars').is(':checked'),
                                  function(result) {
-                                   // We have to count how many progress steps have actually been taken, because
-                                   //bcrypt's progress callback is called an unpredictable number of times.
-                                   while(progressCount < 100) {
-                                     updateProgressBar();
-                                   }
-                                   $('#output').text(result) 
+                                   $('#output').attr('value', result)
+                                               .removeAttr('disabled')
+                                               .select();
                                  },
                                  function() {
-                                   updateProgressBar();
+                                  //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
+                                  var randomString = '';
+                                  
+                                  ++progressCounter;
+
+                                  while(randomString.length < (progressCounter / 100) * 16) {
+                                    randomString+= OUTPUT_CHARS.charAt(Math.floor(Math.random() * OUTPUT_CHARS.length));
+                                  }
+                                  
+                                  //Pad the random string to the right with '-' chars
+                                  randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
+
+                                  $('#output').val(randomString);
                                  });
         }
+        
         function resetProgressBar() {
-          progressCount = 1;
           $('#progressBar div').css('width', 0);
         }
-        function updateProgressBar() {
-          ++progressCount;
-          $('#progressBar div').css('width', progressCount+'%');
-        }
-        $('#generateBtn').click(function() {          
-          generateHash();
-        });
         
+        $('#site, #userName, #masterPw').keydown(function() {
+          $('#output').html('&nbsp;').attr('disabled', 'disabled');
+        });
+
         $('#site').keyup(function() {
           var site = $(this).val(),
               warning = $('#siteNoSpecCharWarning');
@@ -147,12 +155,11 @@
           if(NO_SPEC_CHAR_SITES.indexOf(site) != -1) {
             $('#noCharSiteName').text(site);
             warning.show();
-          } 
+          }
           else {
             warning.hide();
-          }  
+          }
         });
-        
         $('#site').keyup(); //Trigger once in case the user has already typed while scripts loaded
         
         $(document).keypress(function(event) {
@@ -160,7 +167,7 @@
             generateHash();
           }
         });
-        
+
         $(document).ready(function() {
           $('#site').focus();
         });
