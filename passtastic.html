@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Passtastic</title>
     <meta charset="UTF-8" />
     <style type="text/css">
       body {
@@ -12,6 +13,7 @@
         margin: 15px;
         float: left;
         padding: 15px;
+        padding-bottom: 9px;
         background-color: #D1D1D1;
 
         -webkit-border-radius: 20px;
@@ -50,6 +52,10 @@
         float: left;
         background-color: khaki;
         border: 1px solid brown;
+      }
+      
+      #noSpecChars {
+        margin-top: 5px;
       }
     </style>
   </head>
@@ -144,8 +150,13 @@
           $('#progressBar div').css('width', 0);
         }
         
-        $('#site, #userName, #masterPw').keydown(function() {
-          $('#output').html('&nbsp;').attr('disabled', 'disabled');
+        $('#site, #userName, #masterPw').bind({
+          keydown : function() {
+            $('#output').html('&nbsp;').attr('disabled', 'disabled');
+          },
+          focus : function() {
+            $(this).select();
+          }
         });
 
         $('#site').keyup(function() {
