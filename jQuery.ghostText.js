@@ -50,7 +50,7 @@
   function update(field, ghostText) {
     var jqField = $(field);
     
-    if(!jqField.val().length || jqField.val() === ghostText) {
+    if(!jqField.val().length) { //Note that val() will return '' if jqField.hasClass(ghostClass) (see the redefinition of $.fn.val() below)
       jqField.addClass(_emptyClass)
              .val(ghostText);
       
@@ -62,6 +62,22 @@
       }
     } else {
       jqField.removeClass(_emptyClass);
+    }
+  }
+  
+  //TODO: This is a shoddy rewrite of the actual val function, it needs
+  // to be done properly - either figure out how to clone a fucking function
+  // or copy/paste the original val code and change it.
+  $.fn.val = function(value) {
+    if(undefined === value && this.hasClass(_emptyClass)) {
+      return '';
+    }
+    else if(undefined === value) {  
+      return this[0].value;
+    }
+    else {
+      this[0].value = value;
+      return this;
     }
   }
 
