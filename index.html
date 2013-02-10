@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Passtastic</title>
+    <meta charset="UTF-8" />
+    <style type="text/css">
+      body {
+        background-color: #EEEEEE;
+        font: 12pt courier;
+      }
+      
+      #container {
+        margin: 15px;
+        float: left;
+        padding: 15px;
+        padding-bottom: 9px;
+        background-color: #D1D1D1;
+
+        -webkit-border-radius: 20px;
+        border-radius: 20px;
+      }
+
+      input {
+        margin-top: 2px;
+        background-color: #FFFFFF;
+        border: none;
+        border-radius: 5px;
+        padding-left: 5px;
+        color: #AAAAAA;
+        font-family: inherit;
+        font-size: 16pt;
+      }
+      
+      #output {
+        background-color: #AAAAAA;
+      }
+      
+      .ghostTextEmptyInput {
+        color: #CCCCCC;
+      }
+
+      input.error {
+        background-color: rgb(255, 175, 175);
+      }
+
+      .row {
+        margin-bottom: 2px;
+      }
+
+      #siteNoSpecCharWarning {
+        width: 500px;
+        float: left;
+        background-color: khaki;
+        border: 1px solid brown;
+      }
+      
+      #noSpecChars {
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="row">
+        <input id="site" name="site" type="text" />
+      </div>
+      <div class="row">
+        <input id="userName" name="userName" type="text" />
+      </div>
+      <div class="row">
+        <input id="masterPw" name="masterPw" type="password" />
+      </div>
+      <div class="row">
+        <input id="output" disabled="disabled" name="output" type="text" value="--RESULT--" />
+      </div>
+
+      <input id="noSpecChars" name="noSpecChars" type="checkbox" />
+      <label for="noSpecChars">No special chars</label>
+    </div>
+    <div id="siteNoSpecCharWarning" style="display:none">
+      <p>Well shit. It seems like <b id="noCharSiteName"></b> does not allow special characters
+      like ")" or "_" to be used in passwords. This is a stupid policy, and you ought to
+      send them an e-mail and ask them to change their foolish ways, but until they do, we
+      suggest that you click the "No special chars" box.</p>
+      <p>Remember! If you use the "No special chars" option to create a password, you have to make sure
+      to use it whenever you generate your password for that site!</p>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+    <script src="jQuery.ghostText.js" type="text/javascript"></script>
+    <script src="MochiKit/MochiKit.js" type="text/javascript"></script>
+    <script src="Clipperz/Base.js" type="text/javascript"></script>
+    <script src="Clipperz/ByteArray.js" type="text/javascript"></script>
+    <script src="Clipperz/Crypto/BigInt.js" type="text/javascript"></script>
+    <script src="Clipperz/Crypto/SHA.js" type="text/javascript"></script>
+    <script src="Clipperz/Crypto/AES.js" type="text/javascript"></script>
+    <script src="Clipperz/Crypto/PRNG.js" type="text/javascript"></script>
+    <script src="bCrypt.js" type="text/javascript"></script>
+    <script src="md5.js" type="text/javascript"></script>
+    <script src="passtastic.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      (function($) {
+        $('#site').ghostText('--Site--');
+        $('#userName').ghostText('--User Name--');
+        $('#masterPw').ghostText('--Master Password--');
+        
+        //Domains that do not permit special characters in their passwords - the option to generate a password withou
+        // special characters will be recommended to the user for these sites.
+        var NO_SPEC_CHAR_SITES = [
+          'stayfriends.de', //They do allow special characters via user settings, but not on their new-user landing page due to a bug.
+          'delta.com',
+          'hapo.org' //does not allow | ^ ' " ( ) [ ] { } < >
+        ];
+
+        var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
+        var generateHash = function() {
+          if(!generateHash.isRunning) {
+            generateHash.isRunning = 1;
+            $('#output').css('background-color', $('#site').css('background-color'));
+
+            var progressCounter = 0;
+
+            Passtastic.getPassword($('#site').val(),
+                                   $('#userName').val(),
+                                   $('#masterPw').val(),
+                                   !$('#noSpecChars').is(':checked'),
+                                   function(result) {
+                                     $('#output').attr('value', result)
+                                                 .removeAttr('disabled')
+                                                 .select();
+                                     generateHash.isRunning = false;
+                                   },
+                                   function() {
+                                    //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
+                                    var randomString = '';
+
+                                    ++progressCounter;
+
+                                    while(randomString.length < (progressCounter / 100) * 16) {
+                                      randomString+= OUTPUT_CHARS.charAt(Math.floor(Math.random() * OUTPUT_CHARS.length));
+                                    }
+
+                                    //Pad the random string to the right with '-' chars
+                                    randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
+
+                                    $('#output').val(randomString);
+                                   });
+          }
+        };
+        
+        function resetProgressBar() {
+          $('#progressBar div').css('width', 0);
+        }
+        
+        $('#site, #userName, #masterPw').bind({
+          keydown : function() {
+            $('#output').html('&nbsp;').attr('disabled', 'disabled');
+          },
+          focus : function() {
+            $(this).select();
+          }
+        });
+
+        $('#site').keyup(function() {
+          var site = $(this).val(),
+              warning = $('#siteNoSpecCharWarning');
+
+          if(NO_SPEC_CHAR_SITES.indexOf(site) != -1) {
+            $('#noCharSiteName').text(site);
+            warning.show();
+          }
+          else {
+            warning.hide();
+          }
+        });
+        $('#site').keyup(); //Trigger once in case the user has already typed while scripts loaded
+        
+        $(document).keypress(function(event) {
+          if(event.which == 13) {
+            generateHash();
+          }
+        });
+
+        $(document).ready(function() {
+          $('#site').focus();
+        });
+      })(jQuery);
+    </script>
+  </body>
+</html>
