@@ -60,16 +60,25 @@
     </style>
   </head>
 
-  <body>
+  <body>      
+    <!--[if lte ie 8]>
+    <div>
+      <p>You are using an old version of Internet Explorer. Unfortunately, Passtastic does not work in versions
+      of IE earlier than 9. Please upgrade IE to the newest version, or try another browser such as FireFox or
+      Chrome.</p>
+      <p>If you're stuck using an old version of IE because of your draconian sysadmin or idiot boss, just hold
+      tight. I'm working on updates that will make Passtastic work in older browsers.</p>
+    </div>
+    <!-- [endif]-->
     <div id="container">
       <div class="row">
-        <input id="site" name="site" type="text" />
+        <input id="site" name="site" type="text" value="--Site--" />
       </div>
       <div class="row">
-        <input id="userName" name="userName" type="text" />
+        <input id="userName" name="userName" type="text" value="--User Name--" />
       </div>
       <div class="row">
-        <input id="masterPw" name="masterPw" type="password" />
+        <input id="masterPw" name="masterPw" type="password" value="--Password--" />
       </div>
       <div class="row">
         <input id="output" disabled="disabled" name="output" type="text" value="--RESULT--" />
@@ -180,10 +189,6 @@
           if(event.which == 13) {
             generateHash();
           }
-        });
-
-        $(document).ready(function() {
-          $('#site').focus();
         });
       })(jQuery);
     </script>
