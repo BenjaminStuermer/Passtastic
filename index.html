@@ -60,20 +60,20 @@
     <!-- TODO: Make this a form and submit it when generating passwords so that auto-complete can work -->
     <div id="container">
       <div class="row">
-        <input id="site" name="site" type="text" placeholder="Site" />
+        <input class="generator-input" id="site" name="site" type="text" placeholder="Site" />
       </div>
       <div class="row">
-        <input id="userName" name="userName" type="text" placeholder="User Name" />
+        <input class="generator-input" id="userName" name="userName" type="text" placeholder="User Name" />
       </div>
       <div class="row">
-        <input id="masterPw" name="masterPw" type="password" placeholder="Master Password" />
+        <input class="generator-input" id="masterPw" name="masterPw" type="password" placeholder="Master Password" />
       </div>
       <div class="row">
         <!-- TODO: Make this into a "go" button -->
         <input id="output" disabled="disabled" name="output" type="text" />
       </div>
 
-      <input id="noSpecChars" name="noSpecChars" type="checkbox" />
+      <input class="generator-input" id="noSpecChars" name="noSpecChars" type="checkbox" />
       <label for="noSpecChars">No special chars</label>
     </div>
     <div id="siteNoSpecCharWarning" style="display:none">
@@ -118,13 +118,13 @@
                                    $('#userName').val(),
                                    $('#masterPw').val(),
                                    !$('#noSpecChars').is(':checked'),
-                                   function(result) {
+                                   function(result) { //Success callback
                                      $('#output').attr('value', result)
                                                  .removeAttr('disabled')
                                                  .select();
                                      generateHash.isRunning = false;
                                    },
-                                   function() {
+                                   function() { //Called periodically (approx. 100 times) while the password is generated 
                                     //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
                                     var randomString = '';
 
