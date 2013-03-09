@@ -34,10 +34,6 @@
       #output {
         background-color: #AAAAAA;
       }
-      
-      .ghostTextEmptyInput {
-        color: #CCCCCC;
-      }
 
       input.error {
         background-color: rgb(255, 175, 175);
@@ -60,28 +56,21 @@
     </style>
   </head>
 
-  <body>      
-    <!--[if lte ie 8]>
-    <div>
-      <p>You are using an old version of Internet Explorer. Unfortunately, Passtastic does not work in versions
-      of IE earlier than 9. Please upgrade IE to the newest version, or try another browser such as FireFox or
-      Chrome.</p>
-      <p>If you're stuck using an old version of IE because of your draconian sysadmin or idiot boss, just hold
-      tight. I'm working on updates that will make Passtastic work in older browsers.</p>
-    </div>
-    <!-- [endif]-->
+  <body>
+    <!-- TODO: Make this a form and submit it when generating passwords so that auto-complete can work -->
     <div id="container">
       <div class="row">
-        <input id="site" name="site" type="text" value="--Site--" />
+        <input id="site" name="site" type="text" placeholder="Site" />
       </div>
       <div class="row">
-        <input id="userName" name="userName" type="text" value="--User Name--" />
+        <input id="userName" name="userName" type="text" placeholder="User Name" />
       </div>
       <div class="row">
-        <input id="masterPw" name="masterPw" type="password" value="--Password--" />
+        <input id="masterPw" name="masterPw" type="password" placeholder="Master Password" />
       </div>
       <div class="row">
-        <input id="output" disabled="disabled" name="output" type="text" value="--RESULT--" />
+        <!-- TODO: Make this into a "go" button -->
+        <input id="output" disabled="disabled" name="output" type="text" />
       </div>
 
       <input id="noSpecChars" name="noSpecChars" type="checkbox" />
@@ -97,7 +86,6 @@
     </div>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-    <script src="jQuery.ghostText.js" type="text/javascript"></script>
     <script src="MochiKit/MochiKit.js" type="text/javascript"></script>
     <script src="Clipperz/Base.js" type="text/javascript"></script>
     <script src="Clipperz/ByteArray.js" type="text/javascript"></script>
@@ -110,10 +98,6 @@
     <script src="passtastic.js" type="text/javascript"></script>
     <script type="text/javascript">
       (function($) {
-        $('#site').ghostText('--Site--');
-        $('#userName').ghostText('--User Name--');
-        $('#masterPw').ghostText('--Master Password--');
-        
         //Domains that do not permit special characters in their passwords - the option to generate a password withou
         // special characters will be recommended to the user for these sites.
         var NO_SPEC_CHAR_SITES = [
@@ -188,6 +172,19 @@
         $(document).keypress(function(event) {
           if(event.which == 13) {
             generateHash();
+          }
+        });
+
+        $(document).ready(function() {
+          $('#site').focus();
+          
+          //Add labels to fields for browsers that don't support the "placeholder" property
+          if(!('placeholder' in document.createElement('input'))) {
+            $('[placeholder]').each(function() {
+              var cur = $(this),
+              label = $('<label class="placeholder-replacement">').text(' '+cur.attr('placeholder'));
+              cur.after(label);
+            });
           }
         });
       })(jQuery);
