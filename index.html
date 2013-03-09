@@ -84,6 +84,20 @@
       <p>Remember! If you use the "No special chars" option to create a password, you have to make sure
       to use it whenever you generate your password for that site!</p>
     </div>
+    
+    <script type="text/javascript">
+      //Shims for stupid old browsers -- TODO: Move this stuff into its own file
+      if(!Array.prototype.indexOf){
+        Array.prototype.indexOf = function(obj){
+          for(var i=0; i<this.length; i++){
+            if(this[i]==obj){ 
+              return i; 
+            }
+          } 
+          return -1; 
+        }
+      }
+    </script>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="MochiKit/MochiKit.js" type="text/javascript"></script>
