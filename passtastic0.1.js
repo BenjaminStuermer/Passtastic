@@ -1,5 +1,5 @@
 /**
- * Passtastic v0.2
+ * Passtastic v0.1
  * 
  * Author: Benjamin Stuermer
  * 
@@ -26,7 +26,7 @@
   var NUMERICAL_CHARS = '0123456789';
   var SPECIAL_CHARS = '!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~'; // -> The 32 non-whitespace ASCII characters between 33 and 126
   
-  window.Passtastic = {
+  window.Passtastic0_1 = {
     /**
      * Deterministically generates a password based on three strings.
      * 
@@ -196,17 +196,12 @@
       //Step 2: shuffle the strings using the first 49 bits of the binary string
       charArrays = this._shuffle(charArrays, binary.slice(0, 49));
       
-      //Step 3: Use the rest of the binary string as the address of one character from each string
-      var blockSize = this._getRequiredBits(CHAR_ARRAY_LEN),
-          charPosition,
-          charPosBinary,
-          sliceStart, sliceEnd;
+      //Step 3: Use the rest of the binary string to get one character from each string
+      var blockSize = this._getRequiredBits(CHAR_ARRAY_LEN);
+      var curVal;
       for(var i = 0; i < charArrays.length; i++) {
-        sliceStart = 50 + i*blockSize;
-        sliceEnd = sliceStart + blockSize;
-        charPosBinary = binary.slice(sliceStart, sliceEnd);
-        charPosition = parseInt(charPosBinary, 2);
-        password += charArrays[i].charAt(charPosition);
+        curVal = parseInt('0b'+binary.slice(50 + i*blockSize, blockSize));
+        password += charArrays[i].charAt(curVal);
       }
       
       return password;
@@ -232,6 +227,7 @@
       charArrays[0] = charArrays[0].substring(0, CHAR_ARRAY_LEN);
       charArrays[1] = charArrays[1].substring(0, CHAR_ARRAY_LEN);
       charArrays[2] = charArrays[2].substring(0, CHAR_ARRAY_LEN);
+      
       
       if(useSpecialChars) {
         while(charArrays[3].length < CHAR_ARRAY_LEN) { //Fourth array - special chars
