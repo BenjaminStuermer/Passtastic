@@ -53,39 +53,41 @@
       #noSpecChars {
         margin-top: 5px;
       }
+      
+      #goBtn {
+        border-radius: 5px 5px 5px 5px;
+        font-size: 13pt;
+        width: 100%;
+        cursor: pointer;
+      }
     </style>
   </head>
 
-  <body>
+  <body>    
     <div id="container">
-      <div class="row">
-        <input class="generator-input" id="site" name="site" type="text" placeholder="Site" />
-      </div>
-      <div class="row">
-        <input class="generator-input" id="userName" name="userName" type="text" placeholder="User Name" />
-      </div>
-      <div class="row">
-        <input class="generator-input" id="masterPw" name="masterPw" type="password" placeholder="Master Password" />
-      </div>
-      <div class="row">
-        <!-- TODO: Make this into a "go" button -->
-        <input id="output" disabled="disabled" name="output" type="text" />
-      </div>
+      <iframe id="remember" name="remember" style="display:none" src="about:blank">
+        <!-- This serves no purpose but to be a target for the form's submissions, which in turn
+             serve no purpose but to force the browser to trigger its autocomplete functionality -->
+      </iframe>
 
-      <input class="generator-input" id="noSpecChars" name="noSpecChars" type="checkbox" />
-      <label for="noSpecChars">No special chars</label><br><!-- TODO: This is ugly markup, but I have to go play with Josie -->
-      <input class="generator-input" id="useOld" name="useOld" type="checkbox" />
-      <label for="useOld">Use the old, broken algorithm</label><small><sup id="whatsthis" style="cursor: hand; cursor: pointer;">(What's this?)</sup></small>
-    </div>
-    <div id="brokenAlgoExplanation" style="display:none; width: 440px; margin: 4px;">
-      <p>Until March 10, 2013, Passtastic had a pretty horrible bug - all the passwords it generated
-      used the exact same set of characters. So instead of requiring a gazillion computers working
-      for a bazillion years to guess your password, it would require one monkey and about five
-      minutes.</p>
-      <p>Sorry about that :(</p>
-      <p>Passtastic sucks somewhat less now, but to let my poor testers update their
-      passwords, I added the option to use the broken version of the password generator.
-      I'll leave this option until April some time, so please change your passwords by then!</p>
+      <form target="remember" method="post" action="about:blank">
+        <div class="row">
+          <input class="generator-input" id="site" name="site" type="text" placeholder="Site" />
+        </div>
+        <div class="row">
+          <input class="generator-input" id="userName" name="userName" type="text" placeholder="User Name" />
+        </div>
+        <div class="row">
+          <input class="generator-input" id="masterPw" name="masterPw" type="password" placeholder="Master Password" autocomplete="off" />
+        </div>
+        <div class="row">
+          <button id="goBtn" type="submit">Go!</button>
+          <input style="display:none" id="output" name="output" type="text" autocomplete="off" readonly />
+        </div>
+
+        <input id="noSpecChars" name="noSpecChars" type="checkbox" />
+        <label for="noSpecChars">No special chars</label>
+      </form>
     </div>
     <div id="siteNoSpecCharWarning" style="display:none">
       <p>Well shit. It seems like <b id="noCharSiteName"></b> does not allow special characters
@@ -121,16 +123,8 @@
     <script src="bCrypt.js" type="text/javascript"></script>
     <script src="md5.js" type="text/javascript"></script>
     <script src="passtastic.js" type="text/javascript"></script>
-    <script src="passtastic0.1.js" type="text/javascript"></script>
     <script type="text/javascript">
       (function($) {
-        //TODO: In April, remove this and the whole fallback to 0.1
-        $('#whatsthis').on({
-          'click' : function() {
-            $('#brokenAlgoExplanation').show();
-          }
-        });
-        
         //Domains that do not permit special characters in their passwords - the option to generate a password withou
         // special characters will be recommended to the user for these sites.
         var NO_SPEC_CHAR_SITES = [
@@ -147,17 +141,13 @@
 
             var progressCounter = 0;
 
-            //We allow the user to intentionally use Passtastic 0.1 so that my beta testers
-            // can convert their old passwords.
-            var p = $('#useOld').prop('checked') ? Passtastic0_1 : Passtastic;
-
-            p.getPassword($('#site').val(),
+            Passtastic.getPassword($('#site').val(),
               $('#userName').val(),
               $('#masterPw').val(),
               !$('#noSpecChars').is(':checked'),
               function(result) { //Success callback
                 $('#output').attr('value', result)
-                            .removeAttr('disabled')
+                            .focus()
                             .select();
                 generateHash.isRunning = false;
               },
@@ -179,16 +169,38 @@
           }
         };
         
-        function resetProgressBar() {
-          $('#progressBar div').css('width', 0);
+        /**
+         * When an input's value changes, we reset the output so that the user cannot become confused
+         * and think the output corresponds to the wrong inputs
+         */
+        function onInputChange() {
+          $('#output').hide();
+          $('#goBtn').show();
         }
         
-        $('#site, #userName, #masterPw').bind({
+        $('#noSpecChars').change(onInputChange);
+        
+        var _justGainedFocus = false;
+        $('.generator-input').bind({
           keydown : function() {
-            $('#output').html('&nbsp;').attr('disabled', 'disabled');
+            onInputChange();
           },
+          
+          /**
+           * When an input gains focus, select its contents - the user probably wants to replace the value
+           */
           focus : function() {
             $(this).select();
+            _justGainedFocus = true;
+          },
+          mouseup : function() {
+            //This prevents browsers from their default mouseup behavior, which is to put the carat
+            // where the cursor is - this breaks the focus behavior most annoyingly. Returns true if
+            // the element is already focused, though, which allows the user to position the carat
+            // to fix a typing error.
+            var toReturn = !_justGainedFocus;
+            _justGainedFocus = false;
+            return toReturn;
           }
         });
 
@@ -206,24 +218,22 @@
         });
         $('#site').keyup(); //Trigger once in case the user has already typed while scripts loaded
         
-        $(document).keypress(function(event) {
-          if(event.which == 13) {
-            generateHash();
-          }
+        //Since our dummy wrapper form is submitted when 'enter' is pressed, for convenience we can
+        // just bind our hash generation to the submit event.
+        $('form').submit(function(event) {
+          $('#output').val('').show();
+          $('#goBtn').hide();
+          generateHash();
         });
-
-        $(document).ready(function() {
-          $('#site').focus();
-          
-          //Add labels to fields for browsers that don't support the "placeholder" property
-          if(!('placeholder' in document.createElement('input'))) {
-            $('[placeholder]').each(function() {
-              var cur = $(this),
-              label = $('<label class="placeholder-replacement">').text(' '+cur.attr('placeholder'));
-              cur.after(label);
-            });
-          }
-        });
+        
+        //Add labels to fields for browsers that don't support the "placeholder" property
+        if(!('placeholder' in document.createElement('input'))) {
+          $('[placeholder]').each(function() {
+            var cur = $(this),
+            label = $('<label class="placeholder-replacement">').text(' '+cur.attr('placeholder'));
+            cur.after(label);
+          });
+        }
       })(jQuery);
     </script>
   </body>
