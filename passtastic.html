@@ -112,8 +112,8 @@
       }
     </script>
 
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="MochiKit/MochiKit.js" type="text/javascript"></script>
+    <script src="jquery-1.8.3.min.js" type="text/javascript"></script>
     <script src="Clipperz/Base.js" type="text/javascript"></script>
     <script src="Clipperz/ByteArray.js" type="text/javascript"></script>
     <script src="Clipperz/Crypto/BigInt.js" type="text/javascript"></script>
@@ -136,9 +136,12 @@
         var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         var generateHash = function() {
           if(!generateHash.isRunning) {
-            generateHash.isRunning = 1;
-            $('#output').css('background-color', $('#site').css('background-color'));
-
+            generateHash.isRunning = true;
+            $('#output').css('background-color', $('#site').css('background-color'))
+                        .val('')
+                        .show();
+            $('#goBtn').hide();
+            
             var progressCounter = 0;
 
             Passtastic.getPassword($('#site').val(),
@@ -204,6 +207,10 @@
           }
         });
 
+        /**
+         * Whenever the site value is updated, we check the current value against the
+         * list of sites known to not allow special characters in their passwords.
+         */
         $('#site').keyup(function() {
           var site = $(this).val(),
               warning = $('#siteNoSpecCharWarning');
@@ -211,18 +218,16 @@
           if(NO_SPEC_CHAR_SITES.indexOf(site) != -1) {
             $('#noCharSiteName').text(site);
             warning.show();
-          }
-          else {
+          } else {
             warning.hide();
           }
         });
         $('#site').keyup(); //Trigger once in case the user has already typed while scripts loaded
         
-        //Since our dummy wrapper form is submitted when 'enter' is pressed, for convenience we can
-        // just bind our hash generation to the submit event.
+        //Since our dummy wrapper form is submitted when 'enter' is pressed, we bind our hash generation 
+        // to the submit event. This has the advantage that autocomplete trigger and hash generation are
+        // on the same code path, so we won't get inconsistencies between the two.
         $('form').submit(function(event) {
-          $('#output').val('').show();
-          $('#goBtn').hide();
           generateHash();
         });
         
