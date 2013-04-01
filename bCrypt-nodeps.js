@@ -1,8 +1,51 @@
+/**
+ * bCrypt-nodeps.js v1.0
+ * Last updated: March 31, 2013
+ * 
+ * Original Author: nevins.bartolomeo@gmail.com
+ * Modified by: Benjamin Stürmer (benjamin@americanumlaut.de)
+ * 
+ * This is a modified version of the original jsBCrypt. It has been modified
+ * from the original in the following ways:
+ * 
+ * - The method bCrypt.gensalt() has been removed.
+ * - The Clipperz and MochiKit libraries, which were included to allow Clipperz PRNG
+ *   support, have been removed.
+ *   
+ * The original jsBCrypt can be found at https://code.google.com/p/javascript-bcrypt/
+ * 
+ * ----------------------------------------------------------------------------------
+ * License:
+ * 
+ * Copyright (c) <YEAR>, <OWNER>
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list 
+ * of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this 
+ * list of conditions and the following disclaimer in the documentation and/or other 
+ * materials provided with the distribution.
+ * Neither the name of the <ORGANIZATION> nor the names of its contributors may be 
+ * used to endorse or promote products derived from this software without specific 
+ * prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY 
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 function bCrypt() {
-	this.GENSALT_DEFAULT_LOG2_ROUNDS = 10;
 	this.BCRYPT_SALT_LEN = 16;
 	this.BLOWFISH_NUM_ROUNDS = 16;
-	this.PRNG = Clipperz.Crypto.PRNG.defaultRandomGenerator();
 	this.MAX_EXECUTION_TIME = 100;
 	this.P_orig = [0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822,
 			0x299f31d0, 0x082efa98, 0xec4e6c89, 0x452821e6, 0x38d01377,
@@ -521,30 +564,4 @@ bCrypt.prototype.hashpw = function(password, salt, callback, progress) {
 	        rs.push(obj.encode_base64(hashed, obj.bf_crypt_ciphertext.length * 4 - 1));
 	        callback(rs.join(''));
 	}, progress);
-};
-
-bCrypt.prototype.gensalt = function(rounds) {
-	if (typeof(this.PRNG) == 'undefined')
-		throw "PRNG not defined";
-	if(!this.PRNG.isReadyToGenerateRandomValues())
-		throw "PRNG is not ready to generate values, please wait";
-	var iteration_count = rounds;
-	if (iteration_count < 4 || iteration_count > 31) {
-		iteration_count = this.GENSALT_DEFAULT_LOG2_ROUNDS;
-	}
-	var output = [];
-	output.push("$2a$");
-	if (iteration_count < 10)
-		output.push("0");
-	output.push(iteration_count.toString());
-	output.push('$');
-	output.push(this.encode_base64(this.PRNG.getRandomBytes(this.BCRYPT_SALT_LEN).arrayValues(),this.BCRYPT_SALT_LEN));
-	return output.join('');
-};
-
-bCrypt.prototype.ready = function(){
-	if(typeof(this.PRNG) == 'undefined' || !this.PRNG.isReadyToGenerateRandomValues()){
-		return false;
-	}
-	return true;
 };

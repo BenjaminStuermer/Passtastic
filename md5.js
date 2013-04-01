@@ -1,4 +1,10 @@
 /**
+ * md5.js
+ * 
+ * Author: RSA Data Security, Inc.
+ * Modifications by: Benjamin Stürmer (benjamin@americanumlaut.de)
+ * Last updated: March 31, 2013
+ *
  * This file is derived from the RSA Data Security, Inc. MD5 Message-Digest Algorithm. The
  * original source code was retrieved from http://www.queness.com/code-snippet/6523/generate-md5-hash-with-javascript
  * The actual functionality has not been modified - I've simply added a self-executing
