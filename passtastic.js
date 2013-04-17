@@ -5,7 +5,7 @@
  * 
  * A deterministic password generator.
  */
-(function(window, $, undefined){
+(function(window, undefined){
   "use strict";
   
   var BCRYPT_WORK_PARAM = '12';
@@ -330,4 +330,4 @@
       throw('Passtastic._getRequiredBits() - You passed a length requiring more than 10 bits. This function should be rewritten to use log functions if you want to use it for larger numbers.');
     }
   };
-})(window, jQuery);
+})(window);
