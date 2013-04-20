@@ -1,0 +1,4 @@
+content passtastic content/
+skin passtastic classic/1.0 skin/
+locale passtastic en-US locale/en-US/
+overlay chrome://browser/content/browser.xul chrome://passtastic/content/browserOverlay.xul

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
+<?xml-stylesheet type="text/css" href="chrome://passtastic/skin/browserOverlay.css" ?>
+
+<!DOCTYPE overlay SYSTEM "chrome://passtastic/locale/browserOverlay.dtd">
+
+<overlay id="passtastic-browser-overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <script type="text/javascript" src="chrome://passtastic/content/js/browserOverlay.js" />
+  
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="passtastic-string-bundle" 
+                  src="chrome://passtastic/locale/browserOverlay.properties" />
+  </stringbundleset>
+
+  <menubar id="main-menubar">
+    <!-- TODO: Why can't I have this not in a menu? It just disappears on mousedown instead of running oncommand -->
+    <menu id="passtastic-generatePw" 
+          label="&passtastic.generatePw.label;"
+          insertafter="helpMenu">
+      <menupopup>
+        <menuitem id="passtastic-generatePw-item"
+                  label="&passtastic.generatePw.label;"
+                  oncommand="PasstasticChrome.BrowserOverlay.generatePwFromMenu()" />
+      </menupopup>
+    </menu>
+  </menubar>
+
+  <vbox id="appmenuSecondaryPane">
+    <menuitem id="passtastic-hello-menu-item-2"
+              label="&passtastic.generatePw.label;"
+              oncommand="PasstasticChrome.BrowserOverlay.generatePwFromMenu()" />
+  </vbox>
+</overlay>
