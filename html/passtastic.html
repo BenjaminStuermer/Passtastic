@@ -87,6 +87,10 @@
 
         <input id="noSpecChars" name="noSpecChars" type="checkbox" />
         <label for="noSpecChars">No special chars</label>
+
+        <br />
+        <input id="useOldVersion" name="useOldVersion" type="checkbox" />
+        <label for="useOldVersion">Use old version</label>
       </form>
     </div>
     <div id="siteNoSpecCharWarning" style="display:none">
@@ -123,6 +127,8 @@
             $('#goBtn').hide();
             
             var progressCounter = 0;
+            
+            Passtastic.useOldVersion = $('#useOldVersion').is(':checked');
 
             Passtastic.getPassword($('#site').val(),
               $('#userName').val(),
@@ -162,6 +168,7 @@
         }
         
         $('#noSpecChars').change(onInputChange);
+        $('#useOldVersion').change(onInputChange);
         
         var _justGainedFocus = false;
         $('.generator-input').bind({
