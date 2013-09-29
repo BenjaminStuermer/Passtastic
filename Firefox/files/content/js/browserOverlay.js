@@ -43,84 +43,14 @@
        * 
        * @return DOM element
        */
-      getOverlayDialog : function() {
-        var _doc = this._getDocument(),
-            body = _doc.getElementsByTagName('body')[0],
-            container = _doc.createElement('div');
+      getContainer : function() {
+        var _doc = this._getDocument();
+        this._container = _doc.createElement('iframe');
 
-        var head = _doc.getElementsByTagName('head')[0],
-            scripts = ['passtastic.js', 'bCrypt-nodeps.js', 'md5.js'];
-            
-        var curScript;
-        while(curScript = scripts.pop()) {
-          var curScriptDOM = _doc.createElement('script');
-          curScriptDOM.src = 'http://passtastic.americanumlaut.de/'+curScript;
-          head.appendChild(curScriptDOM);
-        }
-        
-        alert(Passtastic);
+        container.src = 'http://passtastic.americanumlaut.de/';
+        container.style.display = "none";
 
-        container.innerHTML =
-          '<div>'
-  +         '<input class="passtastic-input" id="passtastic-input-site" name="passtastic-input-site" type="text" placeholder="Site" />'
-  +       '</div>'
-  +       '<div>'
-  +         '<input class="passtastic-input" id="passtastic-input-userName" name="passtastic-input-userName" type="text" placeholder="User Name" />'
-  +       '</div>'
-  +       '<div>'
-  +         '<input class="passtastic-input" id="passtastic-input-masterPw" name="passtastic-input-masterPw" type="password" placeholder="Master Password" />'
-  +       '</div>'
-  +       '<div>'
-  +         '<button id="passtastic-input-goBtn">Go!</button>'
-  +         '<input style="display:none" id="passtastic-output" name="passtastic-output" type="text" readonly="readonly" />'
-  +       '</div>';
-
-        body.appendChild(container);
-
-        var siteInput = _doc.getElementById('passtastic-input-site');
-        var userNameInput = _doc.getElementById('passtastic-input-userName');
-        var masterPwInput = _doc.getElementById('passtastic-input-masterPw');
-        var goBtn = _doc.getElementById('passtastic-input-goBtn');
-
-        siteInput.value = window.location;
-        
-        goBtn.addEventListener('click', function() {
-          try {
-            var output = _doc.getElementById('passtastic-output'),
-                progressCounter = 0;
-            
-            goBtn.style.display = 'none';
-            output.style.display = ''; //Make the control visible
-            
-            Passtastic.getPassword(siteInput.value, 
-                                   userNameInput.value, 
-                                   masterPwInput.value, 
-                                   true, //use special characters
-                                   function(generatedPw){
-                                     output.value = generatedPw;
-                                   }, 
-                                   function(){
-                                     try {
-                                       var randomString = '';
-
-                                       ++progressCounter;
-                                       
-                                       while(randomString.length < (progressCounter / 100) * 16) {
-                                         randomString+= OUTPUT_CHARS.charAt(Math.floor(Math.random() * OUTPUT_CHARS.length));
-                                       }
-
-                                       //Pad the random string to the right with '-' chars
-                                       randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
-
-                                       output.value = randomString;
-                                     } catch(e) {
-                                       alert('Error in progress callback: ' + e);
-                                     }
-                                  });
-          } catch(e){
-            alert('Error in Passtastic.getPassword():' + e);
-          }
-        });
+        _doc.getElementsByTagName('body')[0].appendChild(container);
       }
     };
   } catch(e) {
