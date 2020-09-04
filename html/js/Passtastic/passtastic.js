@@ -33,10 +33,6 @@
   var SPECIAL_CHARS = '!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~'; // -> The 32 non-whitespace ASCII characters between 33 and 126
 
   window.Passtastic = {
-    useOldVersion : false, //Temporary legacy support while users convert to the new system. If this is true,
-                           // the three input strings are not separated by a pipe, and the bcrypt work parameter
-                           // is 12 instead of 10.
-      
     /**
      * Deterministically generates a password based on three strings.
      * 
@@ -70,10 +66,8 @@
       var self = this,
       bcrypt = new bCrypt();
       
-      //vvv TODO: Remove this after users have switched their passwords vvv
-      var combinedInputs = this.useOldVersion ? site + userName + masterPw : site + '|' + userName + '|' + masterPw;
-      BCRYPT_WORK_PARAM = this.useOldVersion ? 12 : 10;
-      //^^^
+      var combinedInputs = site + '|' + userName + '|' + masterPw;
+      BCRYPT_WORK_PARAM = 10;
 
       bcrypt.hashpw(combinedInputs,
 
