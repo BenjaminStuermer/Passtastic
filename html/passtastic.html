@@ -42,13 +42,6 @@
       .row {
         margin-bottom: 2px;
       }
-
-      #siteNoSpecCharWarning {
-        width: 500px;
-        float: left;
-        background-color: khaki;
-        border: 1px solid brown;
-      }
       
       #noSpecChars {
         margin-top: 5px;
@@ -93,14 +86,6 @@
         <label for="useOldVersion">Use old version</label>
       </form>
     </div>
-    <div id="siteNoSpecCharWarning" style="display:none">
-      <p>Well shit. It seems like <b id="noCharSiteName"></b> does not allow special characters
-      like ")" or "_" to be used in passwords. This is a stupid policy, and you ought to
-      send them an e-mail and ask them to change their foolish ways, but until they do, we
-      suggest that you click the "No special chars" box.</p>
-      <p>Remember! If you use the "No special chars" option to create a password, you have to make sure
-      to use it whenever you generate your password for that site!</p>
-    </div>
 
     <script src="js/jquery-1.8.3.min.js" type="text/javascript"></script>
     <script src="js/Passtastic/bCrypt-nodeps.js" type="text/javascript"></script>
@@ -108,15 +93,6 @@
     <script src="js/Passtastic/passtastic.js" type="text/javascript"></script>
     <script type="text/javascript">
       (function($) {
-        //Domains that do not permit special characters in their passwords - the option to generate a password withou
-        // special characters will be recommended to the user for these sites.
-        var NO_SPEC_CHAR_SITES = [
-          'stayfriends.de', //They do allow special characters via user settings, but not on their new-user landing page due to a bug.
-          'delta.com',
-          'hapo.org', //does not allow | ^ ' " ( ) [ ] { } < >
-          'arcor.de' //At least does not allow commas according to e-mail from R
-        ];
-
         var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         var generateHash = function() {
           if(!generateHash.isRunning) {
@@ -194,23 +170,6 @@
           }
         });
 
-        /**
-         * Whenever the site value is updated, we check the current value against the
-         * list of sites known to not allow special characters in their passwords.
-         */
-        $('#site').keyup(function() {
-          var site = $(this).val(),
-              warning = $('#siteNoSpecCharWarning');
-
-          if(NO_SPEC_CHAR_SITES.indexOf(site) != -1) {
-            $('#noCharSiteName').text(site);
-            warning.show();
-          } else {
-            warning.hide();
-          }
-        });
-        $('#site').keyup(); //Trigger once in case the user has already typed while scripts loaded
-        
         //Since our dummy wrapper form is submitted when 'enter' is pressed, we bind our hash generation 
         // to the submit event. This has the advantage that autocomplete trigger and hash generation are
         // on the same code path, so we won't get inconsistencies between the two.
