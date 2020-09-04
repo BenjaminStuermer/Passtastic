@@ -1,5 +1,3 @@
 Passtastic
 ==========
-A work-in-progress password generator.
-
-Author: Benjamin Stuermer
+A secure, deterministic password generator by Benjamin Stürmer
