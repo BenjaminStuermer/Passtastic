@@ -151,7 +151,7 @@
                         outputElem.attr('value', result)
                             .focus()
                             .select();
-                        adjustFontSizeToFit(outputElem);
+                        adjustFontSizeToFit(outputElem[0]);
                         generateHash.isRunning = false;
 
                         // TODO: It would be nice to add a little toast that tells the user the copy
