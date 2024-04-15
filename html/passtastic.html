@@ -90,6 +90,7 @@
         const siteElem = $('#site');
         const outputElem = $('#output');
         const goBtnElem = $('#goBtn');
+        const noSpecialCharsElem = $('#noSpecChars');
 
         var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         var generateHash = function() {
@@ -105,7 +106,7 @@
             Passtastic.getPassword(siteElem.val(),
               $('#userName').val(),
               $('#masterPw').val(),
-              !$('#noSpecChars').is(':checked'),
+              !noSpecialCharsElem.is(':checked'),
               function(result) { //Success callback
                 outputElem.attr('value', result)
                             .focus()
@@ -139,7 +140,7 @@
           goBtnElem.show();
         }
         
-        $('#noSpecChars').change(onInputChange);
+        noSpecialCharsElem.change(onInputChange);
 
         var _justGainedFocus = false;
         $('.generator-input').bind({
