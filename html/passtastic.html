@@ -92,8 +92,8 @@
         const goBtnElem = $('#goBtn');
         const noSpecialCharsElem = $('#noSpecChars');
 
-        var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
-        var generateHash = function() {
+        const OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
+        const generateHash = () => {
             if(!generateHash.isRunning) {
                 generateHash.isRunning = true;
                 outputElem.css('background-color', siteElem.css('background-color'))
@@ -101,9 +101,9 @@
                     .show();
                 goBtnElem.hide();
 
-                var progressCounter = 0;
-
-                Passtastic.getPassword(siteElem.val(),
+                let progressCounter = 0;
+                Passtastic.getPassword(
+                    siteElem.val(),
                     $('#userName').val(),
                     $('#masterPw').val(),
                     !noSpecialCharsElem.is(':checked'),
@@ -115,7 +115,7 @@
                     },
                     function() { //Called periodically (approx. 100 times) while the password is generated
                         //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
-                        var randomString = '';
+                        let randomString = '';
 
                         ++progressCounter;
 
@@ -127,7 +127,8 @@
                         randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
 
                         outputElem.val(randomString);
-                    });
+                    }
+                );
             }
         };
 
@@ -142,7 +143,6 @@
 
         noSpecialCharsElem.change(onInputChange);
 
-        var _justGainedFocus = false;
         $('.generator-input').bind({
             keydown : function() {
                 onInputChange();
@@ -153,16 +153,12 @@
              */
             focus : function() {
                 $(this).select();
-                _justGainedFocus = true;
             },
             mouseup : function() {
-                //This prevents browsers from their default mouseup behavior, which is to put the carat
-                // where the cursor is - this breaks the focus behavior most annoyingly. Returns true if
-                // the element is already focused, though, which allows the user to position the carat
-                // to fix a typing error.
-                var toReturn = !_justGainedFocus;
-                _justGainedFocus = false;
-                return toReturn;
+                // Returning false prevents the default browser behavior, which would be to place the cursor where
+                // the click occurred, overriding the select() we do in focus(). But we only return false if the
+                // input isn't already selected, so you can click a second time and place the cursor to fix a typo
+                return $(this).is(':focus');
             }
         });
 
