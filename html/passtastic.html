@@ -1,92 +1,92 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Passtastic</title>
     <meta charset="UTF-8" />
     <style type="text/css">
-      body {
-        background-color: #EEEEEE;
-        font: 12pt courier;
-      }
-      
-      #container {
-        margin: 15px;
-        float: left;
-        padding: 15px;
-        padding-bottom: 9px;
-        background-color: #D1D1D1;
+        body {
+            background-color: #EEEEEE;
+            font: 12pt courier;
+        }
 
-        -webkit-border-radius: 20px;
-        border-radius: 20px;
-      }
+        #container {
+            margin: 15px;
+            float: left;
+            padding: 15px;
+            padding-bottom: 9px;
+            background-color: #D1D1D1;
 
-      input {
-        margin-top: 2px;
-        background-color: #FFFFFF;
-        border: none;
-        border-radius: 5px;
-        padding-left: 5px;
-        color: #AAAAAA;
-        font-family: inherit;
-        font-size: 16pt;
-      }
-      
-      #output {
-        background-color: #AAAAAA;
-      }
+            -webkit-border-radius: 20px;
+            border-radius: 20px;
+        }
 
-      .row {
-        margin-bottom: 2px;
-      }
-      
-      #noSpecChars {
-        margin-top: 5px;
-      }
-      
-      #goBtn {
-        border-radius: 5px 5px 5px 5px;
-        font-size: 13pt;
-        width: 100%;
-        cursor: pointer;
-      }
+        input {
+            margin-top: 2px;
+            background-color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            padding-left: 5px;
+            color: #AAAAAA;
+            font-family: inherit;
+            font-size: 16pt;
+        }
+
+        #output {
+            background-color: #AAAAAA;
+        }
+
+        .row {
+            margin-bottom: 2px;
+        }
+
+        #noSpecChars {
+            margin-top: 5px;
+        }
+
+        #goBtn {
+            border-radius: 5px 5px 5px 5px;
+            font-size: 13pt;
+            width: 100%;
+            cursor: pointer;
+        }
     </style>
-  </head>
+</head>
 
-  <body>    
-    <div id="container">
-      <iframe id="remember" name="remember" style="display:none" src="about:blank">
+<body>
+<div id="container">
+    <iframe id="remember" name="remember" style="display:none" src="about:blank">
         <!-- This serves no purpose but to be a target for the form's submissions, which in turn
              serve no purpose but to force the browser to trigger its autocomplete functionality -->
-      </iframe>
+    </iframe>
 
-      <form target="remember" method="post" action="about:blank">
+    <form target="remember" method="post" action="about:blank">
         <div class="row">
-          <input class="generator-input" id="site" name="site" type="text" placeholder="Site" />
+            <input class="generator-input" id="site" name="site" type="text" placeholder="Site" />
         </div>
         <div class="row">
-          <input class="generator-input" id="userName" name="userName" type="text" placeholder="User Name" />
+            <input class="generator-input" id="userName" name="userName" type="text" placeholder="User Name" />
         </div>
         <div class="row">
-          <input class="generator-input" id="masterPw" name="masterPw" type="password" placeholder="Master Password" autocomplete="off" />
+            <input class="generator-input" id="masterPw" name="masterPw" type="password" placeholder="Master Password" autocomplete="off" />
         </div>
         <div class="row">
-          <button id="goBtn" type="submit">Go!</button>
-          <input style="display:none" id="output" name="output" type="text" autocomplete="off" />
+            <button id="goBtn" type="submit">Go!</button>
+            <input style="display:none" id="output" name="output" type="text" autocomplete="off" />
         </div>
 
         <input id="noSpecChars" name="noSpecChars" type="checkbox" />
         <label for="noSpecChars">No special chars</label>
 
         <br />
-      </form>
-    </div>
+    </form>
+</div>
 
-    <script src="js/jquery-1.8.3.min.js" type="text/javascript"></script>
-    <script src="js/Passtastic/bCrypt-nodeps.js" type="text/javascript"></script>
-    <script src="js/Passtastic/md5.js" type="text/javascript"></script>
-    <script src="js/Passtastic/passtastic.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      (function($) {
+<script src="js/jquery-1.8.3.min.js" type="text/javascript"></script>
+<script src="js/Passtastic/bCrypt-nodeps.js" type="text/javascript"></script>
+<script src="js/Passtastic/md5.js" type="text/javascript"></script>
+<script src="js/Passtastic/passtastic.js" type="text/javascript"></script>
+<script type="text/javascript">
+    (function($) {
         const siteElem = $('#site');
         const outputElem = $('#output');
         const goBtnElem = $('#goBtn');
@@ -94,94 +94,94 @@
 
         var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         var generateHash = function() {
-          if(!generateHash.isRunning) {
-            generateHash.isRunning = true;
-            outputElem.css('background-color', siteElem.css('background-color'))
-                        .val('')
-                        .show();
-            goBtnElem.hide();
-            
-            var progressCounter = 0;
-            
-            Passtastic.getPassword(siteElem.val(),
-              $('#userName').val(),
-              $('#masterPw').val(),
-              !noSpecialCharsElem.is(':checked'),
-              function(result) { //Success callback
-                outputElem.attr('value', result)
+            if(!generateHash.isRunning) {
+                generateHash.isRunning = true;
+                outputElem.css('background-color', siteElem.css('background-color'))
+                    .val('')
+                    .show();
+                goBtnElem.hide();
+
+                var progressCounter = 0;
+
+                Passtastic.getPassword(siteElem.val(),
+                    $('#userName').val(),
+                    $('#masterPw').val(),
+                    !noSpecialCharsElem.is(':checked'),
+                    function(result) { //Success callback
+                        outputElem.attr('value', result)
                             .focus()
                             .select();
-                generateHash.isRunning = false;
-              },
-              function() { //Called periodically (approx. 100 times) while the password is generated 
-               //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
-               var randomString = '';
+                        generateHash.isRunning = false;
+                    },
+                    function() { //Called periodically (approx. 100 times) while the password is generated
+                        //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
+                        var randomString = '';
 
-               ++progressCounter;
+                        ++progressCounter;
 
-               while(randomString.length < (progressCounter / 100) * 16) {
-                 randomString+= OUTPUT_CHARS.charAt(Math.floor(Math.random() * OUTPUT_CHARS.length));
-               }
+                        while(randomString.length < (progressCounter / 100) * 16) {
+                            randomString+= OUTPUT_CHARS.charAt(Math.floor(Math.random() * OUTPUT_CHARS.length));
+                        }
 
-               //Pad the random string to the right with '-' chars
-               randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
+                        //Pad the random string to the right with '-' chars
+                        randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
 
-               outputElem.val(randomString);
-            });
-          }
+                        outputElem.val(randomString);
+                    });
+            }
         };
-        
+
         /**
          * When an input's value changes, we reset the output so that the user cannot become confused
          * and think the output corresponds to the wrong inputs
          */
         function onInputChange() {
-          outputElem.hide();
-          goBtnElem.show();
+            outputElem.hide();
+            goBtnElem.show();
         }
-        
+
         noSpecialCharsElem.change(onInputChange);
 
         var _justGainedFocus = false;
         $('.generator-input').bind({
-          keydown : function() {
-            onInputChange();
-          },
-          
-          /**
-           * When an input gains focus, select its contents - the user probably wants to replace the value
-           */
-          focus : function() {
-            $(this).select();
-            _justGainedFocus = true;
-          },
-          mouseup : function() {
-            //This prevents browsers from their default mouseup behavior, which is to put the carat
-            // where the cursor is - this breaks the focus behavior most annoyingly. Returns true if
-            // the element is already focused, though, which allows the user to position the carat
-            // to fix a typing error.
-            var toReturn = !_justGainedFocus;
-            _justGainedFocus = false;
-            return toReturn;
-          }
+            keydown : function() {
+                onInputChange();
+            },
+
+            /**
+             * When an input gains focus, select its contents - the user probably wants to replace the value
+             */
+            focus : function() {
+                $(this).select();
+                _justGainedFocus = true;
+            },
+            mouseup : function() {
+                //This prevents browsers from their default mouseup behavior, which is to put the carat
+                // where the cursor is - this breaks the focus behavior most annoyingly. Returns true if
+                // the element is already focused, though, which allows the user to position the carat
+                // to fix a typing error.
+                var toReturn = !_justGainedFocus;
+                _justGainedFocus = false;
+                return toReturn;
+            }
         });
 
-        //Since our dummy wrapper form is submitted when 'enter' is pressed, we bind our hash generation 
+        //Since our dummy wrapper form is submitted when 'enter' is pressed, we bind our hash generation
         // to the submit event. This has the advantage that autocomplete trigger and hash generation are
         // on the same code path, so we won't get inconsistencies between the two.
         $('form').submit(function(event) {
-          generateHash();
+            generateHash();
         });
-        
+
         //Add labels to fields for browsers that don't support the "placeholder" property
         if(!('placeholder' in document.createElement('input'))) {
-          $('[placeholder]').each(function() {
-            var cur = $(this),
-            label = $('<label class="placeholder-replacement">').text(' '+cur.attr('placeholder'));
-            cur.after(label);
-          });
+            $('[placeholder]').each(function() {
+                var cur = $(this),
+                    label = $('<label class="placeholder-replacement">').text(' '+cur.attr('placeholder'));
+                cur.after(label);
+            });
         }
-      })(jQuery);
-    </script>
-  </body>
+    })(jQuery);
+</script>
+</body>
 </html>
