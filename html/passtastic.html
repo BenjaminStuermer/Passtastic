@@ -87,7 +87,9 @@
                 margin-right: 10px;
             }
             label {
-                margin-top: 25px
+                margin-top: 25px;
+                font-size: 5vh;
+                white-space: nowrap;
             }
             #goBtn {
                 height: 17vh;
@@ -147,6 +149,12 @@
                             .focus()
                             .select();
                         generateHash.isRunning = false;
+
+                        // TODO: It would be nice to add a little toast that tells the user the copy
+                        //  happened, but I need to do my real job now and it's not really worth
+                        //  adding for the one other user, who lives in my house and can be told about
+                        //  this feature in person :-D
+                        navigator.clipboard.writeText(result);
                     },
                     function() { //Called periodically (approx. 100 times) while the password is generated
                         //Every time this is called, we generate a new random-looking string using the same characters that Passtastic uses
