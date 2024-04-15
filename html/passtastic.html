@@ -144,9 +144,7 @@
         noSpecialCharsElem.change(onInputChange);
 
         $('.generator-input').bind({
-            keydown : function() {
-                onInputChange();
-            },
+            keydown : () => onInputChange(),
 
             /**
              * When an input gains focus, select its contents - the user probably wants to replace the value
