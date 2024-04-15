@@ -151,6 +151,7 @@
                         outputElem.attr('value', result)
                             .focus()
                             .select();
+                        adjustFontSizeToFit(outputElem);
                         generateHash.isRunning = false;
 
                         // TODO: It would be nice to add a little toast that tells the user the copy
@@ -196,22 +197,11 @@
             },
 
             keyup : function() {
-                const getFs = () => parseFloat($(this).css('font-size'));
-                const incrementFs = (amount) => $(this).css({'font-size': amount + getFs() });
-
-                if (isOverflown(this)) {
-                    while(isOverflown(this)) {
-                        incrementFs(-.1);
-                    }
-                } else {
-                    while(!isOverflown(this) && getFs() < 21) {
-                        incrementFs(.1);
-                    }
-                }
+                adjustFontSizeToFit(this);
             },
 
             change : function() {
-                $(this).trigger('keyup');
+                adjustFontSizeToFit(this);
             },
 
             /**
@@ -236,6 +226,21 @@
         // to the submit event. This has the advantage that autocomplete trigger and hash generation are
         // on the same code path, so we won't get inconsistencies between the two.
         $('form').on('submit', () => generateHash());
+
+        function adjustFontSizeToFit(input) {
+            const getFs = () => parseFloat($(input).css('font-size'));
+            const incrementFs = (amount) => $(input).css({'font-size': amount + getFs() });
+
+            if (isOverflown(input)) {
+                while(isOverflown(input)) {
+                    incrementFs(-.1);
+                }
+            } else {
+                while(!isOverflown(input) && getFs() < 21) {
+                    incrementFs(.1);
+                }
+            }
+        }
 
         function isOverflown(input) {
             return input.scrollWidth > input.clientWidth;
