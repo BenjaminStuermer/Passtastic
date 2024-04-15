@@ -186,6 +186,7 @@
 
         noSpecialCharsElem.change(onInputChange);
 
+        var _justGainedFocus = false;
         $('input').bind({
             keydown : () => onInputChange(),
 
@@ -194,12 +195,16 @@
              */
             focus : function() {
                 $(this).select();
+                _justGainedFocus = true;
             },
             mouseup : function() {
-                // Returning false prevents the default browser behavior, which would be to place the cursor where
-                // the click occurred, overriding the select() we do in focus(). But we only return false if the
-                // input isn't already selected, so you can click a second time and place the cursor to fix a typo
-                return $(this).is(':focus');
+                //This prevents browsers from their default mouseup behavior, which is to put the carat
+                // where the cursor is - this breaks the focus behavior most annoyingly. Returns true if
+                // the element is already focused, though, which allows the user to position the carat
+                // to fix a typing error.
+                const toReturn = !_justGainedFocus;
+                _justGainedFocus = false;
+                return toReturn;
             }
         });
 
