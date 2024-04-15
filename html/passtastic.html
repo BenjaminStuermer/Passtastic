@@ -131,6 +131,7 @@
         const outputElem = $('#output');
         const goBtnElem = $('#goBtn');
         const noSpecialCharsElem = $('#noSpecChars');
+        const initialInputFontSize = parseFloat($('input').css('font-size'));
 
         const OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         const generateHash = () => {
@@ -236,7 +237,7 @@
                     incrementFs(-.1);
                 }
             } else {
-                while(!isOverflown(input) && getFs() < 21) {
+                while(!isOverflown(input) && getFs() < initialInputFontSize) {
                     incrementFs(.1);
                 }
             }
