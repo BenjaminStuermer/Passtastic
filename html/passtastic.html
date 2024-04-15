@@ -210,6 +210,10 @@
                 }
             },
 
+            change : function() {
+                $(this).trigger('keyup');
+            },
+
             /**
              * When an input gains focus, select its contents - the user probably wants to replace the value
              */
