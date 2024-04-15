@@ -7,45 +7,91 @@
         body {
             background-color: #EEEEEE;
             font: 12pt courier;
+            padding: 15px;
         }
 
         #container {
-            margin: 15px;
-            display: inline-block;
-            padding: 15px;
+            box-sizing: border-box;
+            width: 350px;
+            padding-left: 15px;
+            padding-top: 15px;
             padding-bottom: 9px;
+            padding-right: 25px;
             background-color: #D1D1D1;
             border-radius: 20px;
         }
 
         input {
-            margin-top: 2px;
+            width: 100%;
+            margin-bottom: 5px;
             background-color: #FFFFFF;
             border: none;
             border-radius: 5px;
-            padding-left: 5px;
+            padding: 5px;
             color: #AAAAAA;
             font-family: inherit;
             font-size: 16pt;
+        }
+        input[type=checkbox] {
+            height: 20px;
+            width: 20px;
+            margin-right: 10px;
+        }
+        input:not([type=checkbox]):focus {
+            outline: none;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            font-size: 14pt;
         }
 
         #output {
             background-color: #AAAAAA;
         }
 
-        .row {
-            margin-bottom: 2px;
-        }
-
-        #noSpecChars {
-            margin-top: 5px;
-        }
-
         #goBtn {
             border-radius: 5px 5px 5px 5px;
-            font-size: 13pt;
-            width: 100%;
+            font-size: 15pt;
+            width: calc(100% + 10px);
             cursor: pointer;
+            font-weight: bold;
+            padding: 6px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                overflow: hidden;
+                background-color: #D1D1D1;
+            }
+            #container {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: auto;
+            }
+            input {
+                height: 10vh;
+                padding: 3vh;
+                width: calc(100% - 4vh);
+                font-size: 6vh;
+                margin-bottom: 20px;
+            }
+            input[type=checkbox] {
+                height: 50px;
+                width: 50px;
+                margin-right: 10px;
+            }
+            label {
+                margin-top: 25px
+            }
+            #goBtn {
+                height: 17vh;
+            }
         }
     </style>
 </head>
@@ -58,24 +104,15 @@
     </iframe>
 
     <form target="remember" method="post" action="about:blank">
-        <div class="row">
-            <input class="generator-input" id="site" name="site" type="text" placeholder="Site" />
-        </div>
-        <div class="row">
-            <input class="generator-input" id="userName" name="userName" type="text" placeholder="User Name" />
-        </div>
-        <div class="row">
-            <input class="generator-input" id="masterPw" name="masterPw" type="password" placeholder="Master Password" autocomplete="off" />
-        </div>
-        <div class="row">
-            <button id="goBtn" type="submit">Go!</button>
-            <input style="display:none" id="output" name="output" type="text" autocomplete="off" />
-        </div>
-
-        <input id="noSpecChars" name="noSpecChars" type="checkbox" />
-        <label for="noSpecChars">No special chars</label>
-
-        <br />
+        <input id="site" name="site" type="text" placeholder="Site" />
+        <input id="userName" name="userName" type="text" placeholder="User Name" />
+        <input id="masterPw" name="masterPw" type="password" placeholder="Master Password" autocomplete="off" />
+        <button id="goBtn">Generate Password</button>
+        <input style="display:none" id="output" name="output" type="text" autocomplete="off" />
+        <label>
+            <input id="noSpecChars" name="noSpecChars" type="checkbox" />
+            No special chars
+        </label>
     </form>
 </div>
 
@@ -141,7 +178,7 @@
 
         noSpecialCharsElem.change(onInputChange);
 
-        $('.generator-input').bind({
+        $('input').bind({
             keydown : () => onInputChange(),
 
             /**
