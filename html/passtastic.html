@@ -87,23 +87,27 @@
     <script src="js/Passtastic/passtastic.js" type="text/javascript"></script>
     <script type="text/javascript">
       (function($) {
+        const siteElem = $('#site');
+        const outputElem = $('#output');
+        const goBtnElem = $('#goBtn');
+
         var OUTPUT_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[/]^_`{|}~';
         var generateHash = function() {
           if(!generateHash.isRunning) {
             generateHash.isRunning = true;
-            $('#output').css('background-color', $('#site').css('background-color'))
+            outputElem.css('background-color', siteElem.css('background-color'))
                         .val('')
                         .show();
-            $('#goBtn').hide();
+            goBtnElem.hide();
             
             var progressCounter = 0;
             
-            Passtastic.getPassword($('#site').val(),
+            Passtastic.getPassword(siteElem.val(),
               $('#userName').val(),
               $('#masterPw').val(),
               !$('#noSpecChars').is(':checked'),
               function(result) { //Success callback
-                $('#output').attr('value', result)
+                outputElem.attr('value', result)
                             .focus()
                             .select();
                 generateHash.isRunning = false;
@@ -121,7 +125,7 @@
                //Pad the random string to the right with '-' chars
                randomString = randomString + '----------------'.substring(0, 16 - randomString.length);
 
-               $('#output').val(randomString);
+               outputElem.val(randomString);
             });
           }
         };
@@ -131,8 +135,8 @@
          * and think the output corresponds to the wrong inputs
          */
         function onInputChange() {
-          $('#output').hide();
-          $('#goBtn').show();
+          outputElem.hide();
+          goBtnElem.show();
         }
         
         $('#noSpecChars').change(onInputChange);
