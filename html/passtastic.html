@@ -78,7 +78,7 @@
                 width: auto;
             }
             input {
-                height: 10vh;
+                height: 7vh;
                 padding: 3vh;
                 width: calc(100% - 4vh);
                 font-size: 6vh;
@@ -190,7 +190,7 @@
 
         noSpecialCharsElem.change(onInputChange);
 
-        var _justGainedFocus = false;
+        let _justGainedFocus = false;
         $('input').bind({
             keydown : function() {
                 onInputChange();
