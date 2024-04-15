@@ -169,9 +169,7 @@
         //Since our dummy wrapper form is submitted when 'enter' is pressed, we bind our hash generation
         // to the submit event. This has the advantage that autocomplete trigger and hash generation are
         // on the same code path, so we won't get inconsistencies between the two.
-        $('form').submit(function(event) {
-            generateHash();
-        });
+        $('form').on('submit', () => generateHash());
 
         //Add labels to fields for browsers that don't support the "placeholder" property
         if(!('placeholder' in document.createElement('input'))) {
