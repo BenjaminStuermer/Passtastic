@@ -193,8 +193,16 @@
 
         let _justGainedFocus = false;
         $('input').bind({
-            keydown : function() {
-                onInputChange();
+            keydown : function(e) {
+                // Check if the key pressed is a letter or number (alphanumeric keys)
+                const charCode = e.which;
+                const isAlphanumeric = (charCode >= 48 && charCode <= 57) || // Numbers (0-9)
+                    (charCode >= 65 && charCode <= 90) || // Letters (A-Z)
+                    (charCode >= 97 && charCode <= 122); // Letters (a-z)
+
+                if (isAlphanumeric && !e.ctrlKey && !e.metaKey && !$("#output").is(":focus")) {
+                    onInputChange();
+                }
             },
 
             keyup : function() {
